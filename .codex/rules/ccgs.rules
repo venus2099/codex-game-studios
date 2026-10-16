@@ -1,0 +1,60 @@
+# Codex execution-policy rules for Claude Code Game Studios.
+#
+# Mirrors the destructive-command deny list in .claude/settings.json. Codex
+# rules match a command's leading tokens, so each flag spelling is listed.
+# Test a command with:
+#   codex execpolicy check --rules .codex/rules/ccgs.rules git reset --hard
+#
+# If your Codex build does not load project rules, copy this file to
+# ~/.codex/rules/.
+
+RM_RF = ["-rf", "-fr", "-Rf", "-fR", "-rF", "-Fr", "-RF", "-FR"]
+
+prefix_rule(
+    pattern = ["rm", RM_RF],
+    decision = "forbidden",
+    justification = "Recursive force delete is blocked in this project; delete specific files instead.",
+)
+
+[prefix_rule(
+    pattern = ["rm"] + flags,
+    decision = "forbidden",
+    justification = "Recursive force delete is blocked in this project; delete specific files instead.",
+) for flags in [
+    [["-r", "-R", "--recursive"], ["-f", "--force"]],
+    [["-f", "--force"], ["-r", "-R", "--recursive"]],
+]]
+
+prefix_rule(
+    pattern = ["git", "push", ["--force", "-f", "--force-with-lease", "-uf"]],
+    decision = "forbidden",
+    justification = "Force pushes are blocked; ask the user to push manually.",
+)
+
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "forbidden",
+    justification = "git reset --hard discards work; ask the user first.",
+)
+
+prefix_rule(
+    pattern = ["git", "clean", [
+        "-f", "--force", "-fd", "-df", "-fx", "-xf", "-fX", "-Xf", "-fq", "-qf",
+        "-fdx", "-fxd", "-dfx", "-dxf", "-xdf", "-xfd", "-fdX", "-dXf", "-Xdf",
+        "-qdf", "-dqf", "-fdq", "-qxf", "-xqf",
+    ]],
+    decision = "forbidden",
+    justification = "git clean -f deletes untracked files; ask the user first.",
+)
+
+prefix_rule(
+    pattern = ["sudo"],
+    decision = "forbidden",
+    justification = "sudo is blocked in this project.",
+)
+
+prefix_rule(
+    pattern = ["chmod", "777"],
+    decision = "forbidden",
+    justification = "chmod 777 is blocked in this project.",
+)

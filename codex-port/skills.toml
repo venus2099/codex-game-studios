@@ -1,0 +1,9 @@
+# Skill options for Codex Game Studios. Edit, then regenerate:
+#
+#   python -I codex-port/convert_to_codex.py . .
+
+# Which skills Codex may start on its own, from a plain-language request.
+#   "upstream" - follow upstream: dev-story, story-done, hotfix and
+#                day-one-patch run only when you type $name
+#   "all"      - every skill can be started automatically
+implicit_invocation = "all"

@@ -1,0 +1,53 @@
+# Model tiers for Codex Game Studios.
+#
+# Upstream assigns every skill and agent a Claude tier (haiku / sonnet / opus /
+# inherit) by task difficulty. convert_to_codex.py maps those tiers to Codex
+# models with this file. Edit it, then re-run the converter:
+#
+#   python -I codex-port/convert_to_codex.py . .
+#
+# Model names must be ones your Codex account offers (`/model` lists them).
+# reasoning_effort: low | medium | high | xhigh (what the model supports)
+
+# Upstream `opus`: phase-gate verdicts, multi-document synthesis, the three
+# directors (creative-director, producer, technical-director).
+[tiers.heavy]
+model = "gpt-6-astra"
+reasoning_effort = "high"
+
+# Upstream `sonnet`: implementation, design authoring, single-system analysis.
+[tiers.standard]
+model = "gpt-6.1-sol"
+reasoning_effort = "high"
+
+# Upstream `haiku`: read-only status checks, formatting, simple lookups.
+[tiers.light]
+model = "gpt-6-luna"
+reasoning_effort = "high"
+
+# Escalation: when an agent returns BLOCKED (or an unusable result), the main
+# session retries the step on each tier in `ladder`, in order, then asks the
+# user. Each tier becomes a custom agent named ccgs-<tier>. A step that is no
+# stronger than the tier that already failed is skipped.
+[tiers.escalation]
+model = "gpt-6-astra"
+reasoning_effort = "high"
+
+[tiers.escalation-max]
+model = "gpt-6-astra"
+reasoning_effort = "xhigh"
+
+[escalation]
+ladder = ["escalation", "escalation-max"]
+
+[mapping]
+opus = "heavy"
+sonnet = "standard"
+haiku = "light"
+# Agents upstream leaves on `inherit` (designers, programmers, QA, ...).
+# A tier name pins them to that tier; "session" keeps the session's model.
+inherit = "standard"
+
+# Per-agent or per-skill overrides, by name: tier name or "session".
+[overrides]
+# "game-designer" = "heavy"

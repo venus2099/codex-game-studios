@@ -1,0 +1,12 @@
+modes:
+  automation: guided
+  # Asked even in autonomous mode. The last four are this project's creative
+  # categories; AGENTS.md "Project notes" makes them ask in guided mode too.
+  automation_always_ask:
+    - scope_changes
+    - file_deletions
+    - schema_changes
+    - art_and_visuals
+    - story_and_narrative
+    - player_facing_text
+    - music_and_audio

@@ -1,0 +1,110 @@
+{
+  "description": "Claude Code Game Studios hooks, run under Codex via .codex/hooks/codex-hook.sh",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .codex/hooks/codex-hook.sh pass .claude/hooks/session-start.sh",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash .codex/hooks/codex-hook.sh pass .claude/hooks/detect-gaps.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .codex/hooks/codex-hook.sh pass .claude/hooks/validate-commit.sh",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "bash .codex/hooks/codex-hook.sh pass .claude/hooks/validate-push.sh",
+            "timeout": 10
+          }
+        ],
+        "matcher": "^Bash$"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .codex/hooks/codex-hook.sh patch .claude/hooks/validate-assets.sh",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "bash .codex/hooks/codex-hook.sh patch .claude/hooks/validate-skill-change.sh",
+            "timeout": 10
+          }
+        ],
+        "matcher": "^(apply_patch|Edit|Write)$"
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .codex/hooks/codex-hook.sh quiet .claude/hooks/pre-compact.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .codex/hooks/codex-hook.sh quiet .claude/hooks/post-compact.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .codex/hooks/codex-hook.sh quiet .claude/hooks/session-stop.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .codex/hooks/codex-hook.sh quiet .claude/hooks/log-agent.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .codex/hooks/codex-hook.sh quiet .claude/hooks/log-agent-stop.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
