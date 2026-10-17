@@ -193,6 +193,8 @@ Change the mode by saying "set automation to collaborative" (Codex uses `$settin
 
 **Director reviews run at phase gates only.** The template sets `modes.review_mode: lean`: the creative director, producer and technical director review at `$gate-check` phase gates, and per-step director reviews are skipped. Because the value is set in `project.yaml`, the rigor answer in `$start` no longer changes it; use `$settings modes.review_mode=full` (every step) or `solo` (no director reviews) to change it.
 
+The template also sets `modes.workflow: full`: every design document needs all eight sections, every architecture decision gets an ADR, and the phase-gate panel has all four directors (creative, technical, producer, art). With `minimal` the panel is the producer alone; with `standard` it is the technical director and producer. Documentation depth (`docs.density`) and QA level (`qa.level`) are separate settings and stay at their defaults.
+
 **Creative decisions are always yours.** The template adds four categories to `modes.automation_always_ask`:
 - `art_and_visuals`
 - `story_and_narrative`

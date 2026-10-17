@@ -193,6 +193,8 @@ Codex 的技能没法自己切换模型，所以各档的处理方式不同：
 
 **总监只在阶段评审时出场。** 模板把 `modes.review_mode` 设为 `lean`：创意总监、制作人、技术总监只在 `$gate-check` 阶段评审时参与，平时每一步的总监评审会跳过。因为这个值直接写在了 `project.yaml` 里，`$start` 里选的严谨程度不会再改变它；想调整就用 `$settings modes.review_mode=full`（每一步都评审）或 `solo`（不请总监）。
 
+模板还设了 `modes.workflow: full`：每份设计文档都要写全 8 个章节，每个架构决定都要写技术决策记录（ADR），阶段评审时四位总监（创意、技术、制作、美术）全部出场。如果是 `minimal`，阶段评审只有制作人；`standard` 是技术总监加制作人。文档写多细（`docs.density`）和测试要求（`qa.level`）是另外的设置，仍保持默认值。
+
 **创作类决定始终由你来定。** 模板在 `modes.automation_always_ask` 里加了四个类别：
 - `art_and_visuals`
 - `story_and_narrative`

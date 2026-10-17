@@ -32,6 +32,9 @@ modes:
   # means the rigor answer in $start / /start no longer changes it; change it
   # with $settings modes.review_mode=<full|lean|solo>.
   review_mode: lean
+  # Full process: every GDD section, every ADR, and all four directors (creative,
+  # technical, producer, art) on the phase-gate panel. Pinned like review_mode.
+  workflow: full
   # Asked even in autonomous mode. The last four are this project's creative
   # categories; PROJECT-NOTES.md makes them ask in guided mode too.
   automation_always_ask:
