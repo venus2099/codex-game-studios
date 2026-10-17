@@ -783,6 +783,38 @@ def apply_project_modes_preset(out):
     )
 
 
+CODEX_DOC_LIMIT = 32 * 1024  # Codex's default project_doc_max_bytes
+
+
+def ensure_doc_limit(out, size):
+    """Raise project_doc_max_bytes in .codex/config.toml when AGENTS.md outgrows 32 KiB.
+
+    Past the limit Codex silently drops the end of AGENTS.md (the model tiers,
+    path-scoped rules and agent roster). Returns the limit now in effect.
+    """
+    if size <= CODEX_DOC_LIMIT:
+        return CODEX_DOC_LIMIT
+    cfg = out / ".codex" / "config.toml"
+    text = cfg.read_text(encoding="utf-8") if cfg.exists() else ""
+    want = max(64 * 1024, -(-size * 3 // 2 // 1024) * 1024)
+    m = re.search(r"(?m)^project_doc_max_bytes\s*=\s*(\d+)\s*$", text)
+    if m and int(m.group(1)) >= size:
+        return int(m.group(1))
+    line = f"project_doc_max_bytes = {want}"
+    if m:
+        text = text[: m.start()] + line + text[m.end():]
+    else:
+        # A top-level key must come before any [table], so put it first.
+        text = (
+            "# Added by convert_to_codex.py: AGENTS.md (with PROJECT-NOTES.md) is longer\n"
+            "# than Codex's 32 KiB default, which would cut off its end.\n"
+            f"{line}\n" + ("\n" + text if text else "")
+        )
+    cfg.parent.mkdir(parents=True, exist_ok=True)
+    cfg.write_text(text, encoding="utf-8", newline="\n")
+    return want
+
+
 # --- main -----------------------------------------------------------------------
 
 def main():
@@ -840,8 +872,10 @@ def main():
     for _, _, t in roster:
         agent_tiers[t] = agent_tiers.get(t, 0) + 1
     print("agent tiers: " + ", ".join(f"{k} {v}" for k, v in agent_tiers.items()))
-    if size > 32 * 1024:
-        print("WARNING: AGENTS.md exceeds Codex's default 32 KiB project_doc_max_bytes")
+    limit = ensure_doc_limit(out, size)
+    if size > CODEX_DOC_LIMIT:
+        print(f"AGENTS.md is over 32 KiB; .codex/config.toml sets project_doc_max_bytes = {limit}"
+              " (Codex applies it in trusted projects)")
     for d in dropped:
         print(f"hook not ported: {d}")
 
