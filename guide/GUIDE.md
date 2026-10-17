@@ -26,7 +26,8 @@ What a game project contains:
 
 | Path | What it is |
 |---|---|
-| `AGENTS.md` | Codex's standing instructions for the project, read at the start of every session. Generated, except for its "Project notes" block, which is yours. |
+| `AGENTS.md` | Codex's standing instructions for the project, read at the start of every session. Generated; don't edit it. |
+| `PROJECT-NOTES.md` | **Your own rules for the project**, shared by both tools: Codex gets a copy inside `AGENTS.md`, and Claude Code imports it from `CLAUDE.md`. |
 | `CLAUDE.md`, `.claude/` | The original studio: agent roles, skills, rules, docs, hooks. This is the single source of truth, and the Codex layer points into it. |
 | `.agents/skills/` | One small Codex entry point per skill, pointing at `.claude/skills/<name>/SKILL.md`. |
 | `.codex/agents/` | The 49 agents as Codex custom agents, plus the runner and escalation agents added by the port. |
@@ -101,7 +102,9 @@ Codex only loads `AGENTS.md`, skills, agents and hooks when a session starts. Af
    - **Commits nothing.**
 3. **Merge `AGENTS.md` if your project already had one.** Until you do, Codex keeps reading your old file and the studio rules are inactive (the skills still work). The easiest way is to ask Codex:
 
-   > Move the rules from my AGENTS.md into the "Project notes" block of AGENTS.md.ccgs-new, replace AGENTS.md with it, and delete the .ccgs-new file.
+   > Move the rules from my AGENTS.md into PROJECT-NOTES.md, replace AGENTS.md with AGENTS.md.ccgs-new, run `python -I codex-port/convert_to_codex.py . .`, and delete the .ccgs-new file.
+
+   If the project already had a `CLAUDE.md`, also add the line `@PROJECT-NOTES.md` to it, so Claude Code follows the same rules.
 
    Handle any other `.ccgs-new` files the same way.
 4. Start Codex in the project, trust it, and trust the hooks with `/hooks`.
@@ -164,7 +167,7 @@ A Codex skill cannot switch the model, so the port handles each tier differently
 
 Codex also escalates when a result is clearly unusable: tests still fail, it fails its acceptance criteria, or it contradicts the design. Heavy agents already run on astra at high, so they skip straight to level 2. Each step is escalated at most once per level. Questions for you and creative decisions are never escalated; they go straight to you.
 
-**Two attempts, then ask.** Escalation never retries a fix that has already failed twice. Any single problem gets at most two attempts in total; after that the agent returns `BLOCKED: two attempts failed` and Codex asks you. This rule lives in the "Project notes" block of `AGENTS.md` (section 7), together with two others: name the deliverable in one sentence before starting a fix, and stop to check with you after a long stretch of implementation work with no edits.
+**Two attempts, then ask.** Escalation never retries a fix that has already failed twice. Any single problem gets at most two attempts in total; after that the agent returns `BLOCKED: two attempts failed` and Codex asks you. This rule lives in `PROJECT-NOTES.md` (section 7), together with two others: name the deliverable in one sentence before starting a fix, and stop to check with you after a long stretch of implementation work with no edits.
 
 To change any of this, edit `model_tiers.toml`, then regenerate (section 9):
 - **Change a tier's model or reasoning:** edit `[tiers.*]`.
@@ -191,7 +194,7 @@ Change the mode by saying "set automation to collaborative" (Codex uses `$settin
 - `player_facing_text`
 - `music_and_audio`
 
-The original only checks that list in autonomous mode, so the "Project notes" block of `AGENTS.md` makes these four ask in every mode. They cover:
+The original only checks that list in autonomous mode, so `PROJECT-NOTES.md` makes these four ask in every mode. They cover:
 - **Art and visuals:** art style, how characters and places look, palette, UI look, effects.
 - **Story and narrative:** plot, characters, world and lore, quests, endings, tone.
 - **Player-facing text:** dialogue, item and skill text, UI copy, tutorials, store page.
@@ -207,24 +210,26 @@ Subagents can't talk to you. When they hit one of these decisions, they return i
 |---|---|
 | `codex-port/model_tiers.toml` | Tier → model and reasoning; escalation ladder; per-agent and per-skill overrides |
 | `codex-port/skills.toml` | `implicit_invocation = "all"` lets Codex start every skill automatically. `"upstream"` restores the original, where `$dev-story`, `$story-done`, `$hotfix` and `$day-one-patch` only run when you type them. |
-| `codex-port/preset/project-notes.md` | Default "Project notes" for new `AGENTS.md` files (the creative-decisions rule) |
+| `codex-port/preset/project-notes.md` | Starting content for `PROJECT-NOTES.md` in a freshly built template (the creative-decisions and retry rules) |
 | `codex-port/preset/project-modes.yaml` | Default `modes:` block for a freshly built template's `project.yaml` |
 | `project.yaml` | Engine, automation mode, always-ask categories, review intensity and other studio settings. Change it with `$settings`, or edit it directly. |
 | `project.local.yaml` | Your personal overrides of `project.yaml`. Git ignores it. |
-| `AGENTS.md` → "Project notes" | Your own standing instructions for Codex in this project. |
+| `PROJECT-NOTES.md` | Your own standing rules for this project, followed by both Codex and Claude Code. |
 
 **Where to put your own rules:**
 
 | Kind of rule | Put it in |
 |---|---|
 | Personal habits for every project ("reply in Chinese") | `~/.codex/AGENTS.md` |
-| Short rules for this project | The "Project notes" block of `AGENTS.md` |
-| Long or detailed rules | A separate file, plus one line in Project notes saying when to read it |
+| Short rules for this project | `PROJECT-NOTES.md` |
+| Long or detailed rules | A separate file, plus one line in `PROJECT-NOTES.md` saying when to read it |
 | Rules for certain files only | A file in `.claude/rules/` with a `paths:` header |
 | Project settings | `project.yaml`, or `$settings` |
 | Things that must never happen | `.codex/rules/` or a hook. `AGENTS.md` is guidance; rules and hooks are enforced. |
 
-Codex reads at most 32 KiB of `AGENTS.md` by default. The generated file is about 23 KiB, so keep Project notes short. Project notes sit near the top of the file, so they survive even if it grows past the limit.
+Codex reads at most 32 KiB of `AGENTS.md` by default. The generated file is about 24 KiB including your notes, so keep `PROJECT-NOTES.md` short. The notes sit near the top of `AGENTS.md`, so they survive even if it grows past the limit.
+
+**After you edit `PROJECT-NOTES.md`:** Claude Code picks the change up in its next session. Codex reads a copy, so regenerate (section 9). Until you do, a session-start hook notices the change and tells Codex to read `PROJECT-NOTES.md` directly.
 
 ## 9. Regenerating the Codex layer
 
@@ -235,7 +240,7 @@ python -I codex-port/convert_to_codex.py . .
 ```
 
 It rewrites only generated files:
-- `AGENTS.md` (except the Project notes block)
+- `AGENTS.md` (its Project notes block is copied from `PROJECT-NOTES.md`, which is never overwritten)
 - `.agents/skills/`
 - `.codex/agents/`
 - `.codex/hooks.json`
@@ -313,3 +318,4 @@ Existing game projects can follow upstream's `UPGRADING.md` (in `upstream/`) to 
 | Four skills manual-only | All skills can start automatically (configurable) |
 | Folder `CLAUDE.md` files load automatically | Listed in `AGENTS.md`'s path-scoped rules table; Codex reads them before editing those folders |
 | Status line, desktop notifications, agent teams | Not available in Codex |
+| Project rules in `CLAUDE.md` | Shared `PROJECT-NOTES.md`: Codex copies it into `AGENTS.md`, Claude Code imports it |

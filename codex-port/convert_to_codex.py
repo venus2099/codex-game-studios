@@ -16,13 +16,18 @@ The output is a full copy of the upstream repository plus a Codex layer:
     .codex/hooks/codex-hook.sh     that adapter (from overlay/)
     .codex/rules/ccgs.rules        the upstream deny list as Codex rules (overlay/)
     README-CODEX.md                usage notes (overlay/)
+    PROJECT-NOTES.md               the project's own rules, created once and then
+                                   never overwritten; copied into AGENTS.md and
+                                   imported by a "Project Notes" section that is
+                                   appended to CLAUDE.md once
 
-Upstream files are copied, never modified, so the result still works in Claude
-Code too. An existing, non-empty output folder is never deleted or overwritten;
-regenerating in place rewrites only the files listed above (AGENTS.md keeps its
-"Project notes" block).
+Upstream files are copied unchanged apart from that one appended CLAUDE.md
+section, so the result still works in Claude Code. An existing, non-empty output
+folder is never deleted or overwritten; regenerating in place rewrites only the
+generated files listed above.
 """
 
+import hashlib
 import json
 import re
 import shutil
@@ -465,6 +470,13 @@ def convert_hooks(src, out):
                 new_groups.append(g)
         if new_groups:
             codex[event] = new_groups
+    # Port-only check: tell Codex when PROJECT-NOTES.md is newer than its copy
+    # in AGENTS.md, so an edit takes effect before the next regeneration.
+    codex.setdefault("SessionStart", []).append({"hooks": [{
+        "type": "command",
+        "command": "bash .codex/hooks/codex-hook.sh pass .codex/hooks/notes-check.sh",
+        "timeout": 5,
+    }]})
     doc = {
         "description": "Claude Code Game Studios hooks, run under Codex via .codex/hooks/codex-hook.sh",
         "hooks": codex,
@@ -509,9 +521,62 @@ Also:
 """
 
 
-NOTES_BEGIN = "<!-- BEGIN PROJECT NOTES: kept when convert_to_codex.py regenerates this file -->"
+NOTES_BEGIN = "<!-- BEGIN PROJECT NOTES: copied from PROJECT-NOTES.md; edit that file, not this block -->"
 NOTES_END = "<!-- END PROJECT NOTES -->"
-DEFAULT_NOTES = "_Add your own project instructions for Codex here._"
+NOTES_RE = re.compile(r"<!-- BEGIN PROJECT NOTES[^>]*-->\n(.*?)\n<!-- END PROJECT NOTES -->", re.S)
+DEFAULT_NOTES = "_Add your own project instructions here._"
+
+# PROJECT-NOTES.md is the one place for the project's own rules. Codex gets a
+# copy inlined into AGENTS.md (it cannot import files); Claude Code imports the
+# file from CLAUDE.md, so both tools follow the same rules.
+NOTES_FILE = "PROJECT-NOTES.md"
+NOTES_HEADER = (
+    "<!-- Project rules shared by Codex and Claude Code. Edit this file: CLAUDE.md\n"
+    "     imports it, and convert_to_codex.py copies it into AGENTS.md. -->\n\n"
+    "# Project notes\n\n"
+)
+CLAUDE_IMPORT = (
+    "## Project Notes\n\n"
+    "Project-specific rules, shared with Codex. Where they conflict with the\n"
+    "defaults above, they win.\n\n"
+    f"@{NOTES_FILE}\n"
+)
+
+
+def notes_sha(path):
+    """Hash ignoring CR, so a CRLF checkout of the same text does not differ."""
+    return hashlib.sha256(path.read_bytes().replace(b"\r", b"")).hexdigest()
+
+
+def ensure_project_notes(out):
+    """Create PROJECT-NOTES.md if missing; return (body for AGENTS.md, sha256)."""
+    path = out / NOTES_FILE
+    if not path.exists():
+        notes = None
+        agents = out / "AGENTS.md"
+        if agents.exists():  # migrate rules written in an older AGENTS.md block
+            m = NOTES_RE.search(agents.read_text(encoding="utf-8"))
+            if m and m.group(1).strip() not in ("", DEFAULT_NOTES, "_Add your own project instructions for Codex here._"):
+                notes = m.group(1)
+        if notes is None:
+            preset = HERE / "preset" / "project-notes.md"
+            notes = preset.read_text(encoding="utf-8") if preset.exists() else DEFAULT_NOTES
+        path.write_text(NOTES_HEADER + notes.strip("\n") + "\n", encoding="utf-8", newline="\n")
+    text = path.read_text(encoding="utf-8").replace("\r\n", "\n")
+    body = re.sub(r"\A\s*<!--.*?-->\s*", "", text, flags=re.S)
+    body = re.sub(r"\A# Project notes\s*\n", "", body).strip("\n")
+    return body, notes_sha(path)
+
+
+def ensure_claude_import(out):
+    """Make CLAUDE.md import PROJECT-NOTES.md (once)."""
+    claude = out / "CLAUDE.md"
+    if not claude.exists():
+        return
+    text = claude.read_text(encoding="utf-8")
+    if f"@{NOTES_FILE}" in text:
+        return
+    claude.write_text(text.rstrip("\n") + "\n\n" + CLAUDE_IMPORT, encoding="utf-8", newline="\n")
 
 
 def model_tier_section(tiers, skills_by_tier, roster):
@@ -601,6 +666,10 @@ def build_agents_md(src, out, skill_names, roster, rule_rows, tiers, skills_by_t
             return f"See `{rel}`."
         return f"<!-- inlined from {rel} -->\n" + demote_headings(p.read_text(encoding="utf-8").strip(), 2) + "\n"
 
+    # CLAUDE.md's own import of PROJECT-NOTES.md: AGENTS.md carries the notes
+    # in its Project notes block instead.
+    text = text.replace(CLAUDE_IMPORT, "")
+    text = re.sub(r"^@" + re.escape(NOTES_FILE) + r"\s*$\n?", "", text, flags=re.M)
     text = re.sub(r"<!-- ENGINE-REFERENCE-IMPORT.*?-->\n", "", text, flags=re.S)
     text = re.sub(r"^@(\S+)\s*$", inline, text, flags=re.M)
 
@@ -639,21 +708,18 @@ def build_agents_md(src, out, skill_names, roster, rule_rows, tiers, skills_by_t
     )
 
     target = out / "AGENTS.md"
-    preset = HERE / "preset" / "project-notes.md"
-    notes = preset.read_text(encoding="utf-8").rstrip("\n") if preset.exists() else DEFAULT_NOTES
-    if target.exists():
-        old = target.read_text(encoding="utf-8")
-        m = re.search(re.escape(NOTES_BEGIN) + r"\n(.*?)\n" + re.escape(NOTES_END), old, re.S)
-        if m:
-            notes = m.group(1)
-    project_notes = f"\n## Project notes\n\n{NOTES_BEGIN}\n{notes}\n{NOTES_END}\n"
+    notes, sha = ensure_project_notes(out)
+    project_notes = (
+        f"\n## Project notes\n\n<!-- project-notes-sha256: {sha} -->\n"
+        f"{NOTES_BEGIN}\n{notes}\n{NOTES_END}\n"
+    )
 
     # Project notes go right after the compatibility table: Codex truncates
     # AGENTS.md past project_doc_max_bytes, and the user's rules must survive.
     body = (
         head
-        + "\n<!-- Generated by codex-port/convert_to_codex.py. Only the Project notes"
-        " block survives regeneration. -->\n\n"
+        + "\n<!-- Generated by codex-port/convert_to_codex.py; do not edit. Put your own"
+        f" rules in {NOTES_FILE}. -->\n\n"
         + COMPAT
         + project_notes
         + "\n"
@@ -749,6 +815,7 @@ def main():
     roster = convert_agents(src, out, skill_names, tiers)
     dropped = convert_hooks(src, out)
     size = build_agents_md(src, out, skill_names, roster, rule_table(src), tiers, skills_by_tier)
+    ensure_claude_import(out)
     if HERE != (out / "codex-port").resolve():
         shutil.copytree(HERE, out / "codex-port", ignore=shutil.ignore_patterns("__pycache__"),
                         dirs_exist_ok=True)

@@ -24,6 +24,7 @@
 - **卡住时自动升级**：agent 解决不了问题时会报告 `BLOCKED:`，不会瞎猜。Codex 会先换更强的模型重做这一步，还不行就用最强模型加最高推理强度，最后才来问你。
 - **创作决定始终归你**：模板默认使用 guided 模式，小事 Codex 自己处理，但美术、故事、玩家可见的文本、音乐这四类决定，一律交给你拍板。
 - **安全的安装脚本**：一个脚本用来新建游戏，另一个用来把工作室装进已有的游戏项目，不会覆盖项目里的任何文件。
+- **两个工具共用一份规矩**：项目自己的规矩写在 `PROJECT-NOTES.md` 里。Codex 读 `AGENTS.md` 里的副本，Claude Code 通过 `CLAUDE.md` 直接引用它，两边遵守的是同一套规矩。
 - **重新生成工具**：改了设置或者原版更新之后，用 `codex-port/convert_to_codex.py` 重新生成 Codex 配置层。
 
 ## 环境要求
@@ -60,7 +61,7 @@ bash ~/code/codex-game-studios/codex-port/add-to-project.sh ~/code/existing-game
 
 这个脚本不会覆盖任何文件。如果项目里已经有同名但内容不同的文件，你的文件保持原样，模板的版本会另存为旁边的 `文件名.ccgs-new`。
 
-如果项目原本就有 `AGENTS.md`，开始之前一定要先合并：把你自己的规则移到 `AGENTS.md.ccgs-new` 的「Project notes」区块里，再用它替换 `AGENTS.md`。不合并的话，工作室规则不会生效。
+如果项目原本就有 `AGENTS.md`，开始之前一定要先合并：把你自己的规则移到 `PROJECT-NOTES.md` 里，再用 `AGENTS.md.ccgs-new` 替换 `AGENTS.md`，然后重新生成（`python -I codex-port/convert_to_codex.py . .`）。不合并的话，工作室规则不会生效。如果项目原本就有 `CLAUDE.md`，在里面加一行 `@PROJECT-NOTES.md`，让 Claude Code 也遵守同一套规矩。
 
 合并好之后，在项目里启动 Codex，信任项目和钩子，然后输入 `$adopt` 生成迁移计划。
 

@@ -119,8 +119,14 @@ if [ ${#conflicts[@]} -gt 0 ]; then
     if [ "$c" = "AGENTS.md" ]; then
       echo
       echo "  AGENTS.md matters most: until it is merged, Codex reads your old file"
-      echo "  and the studio rules are inactive. Move your own rules into the"
-      echo "  \"Project notes\" block of AGENTS.md.ccgs-new, then replace AGENTS.md with it."
+      echo "  and the studio rules are inactive. Move your own rules into"
+      echo "  PROJECT-NOTES.md, replace AGENTS.md with AGENTS.md.ccgs-new, then run"
+      echo "  python -I codex-port/convert_to_codex.py . ."
+    fi
+    if [ "$c" = "CLAUDE.md" ]; then
+      echo
+      echo "  CLAUDE.md: keep yours, and add the line @PROJECT-NOTES.md to it so"
+      echo "  Claude Code follows the same project rules as Codex."
     fi
   done
 fi

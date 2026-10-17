@@ -26,7 +26,8 @@
 
 | 路径 | 是什么 |
 |---|---|
-| `AGENTS.md` | 给 Codex 的项目说明书，每次会话开始时自动读取。这个文件是脚本生成的，只有其中的「Project notes」区块归你自己写。 |
+| `AGENTS.md` | 给 Codex 的项目说明书，每次会话开始时自动读取。这个文件是脚本生成的，不要手动改。 |
+| `PROJECT-NOTES.md` | **你自己给项目定的规矩**，两个工具共用：Codex 读 `AGENTS.md` 里的副本，Claude Code 通过 `CLAUDE.md` 直接引用它。 |
 | `CLAUDE.md`、`.claude/` | 原版工作室的全部内容：agent 角色、技能、规则、文档、钩子。这是唯一的权威来源，Codex 配置层都指向这里。 |
 | `.agents/skills/` | 每个技能对应一个很小的 Codex 入口文件，指向 `.claude/skills/<名字>/SKILL.md`。 |
 | `.codex/agents/` | 49 个 agent 对应的 Codex 自定义 agent，以及移植版新增的执行 agent 和升级 agent。 |
@@ -101,7 +102,9 @@ codex
    - **不会提交任何东西。**
 3. **如果项目原本就有 `AGENTS.md`，必须合并**。不合并的话，Codex 读的还是你原来的文件，工作室的规则不会生效（技能本身还能用）。最简单的办法是直接让 Codex 合并：
 
-   > 把我 AGENTS.md 里原来的规则移到 AGENTS.md.ccgs-new 的「Project notes」区块里，然后用它替换 AGENTS.md，再删掉 .ccgs-new 文件。
+   > 把我 AGENTS.md 里原来的规则移到 PROJECT-NOTES.md 里，用 AGENTS.md.ccgs-new 替换 AGENTS.md，运行 `python -I codex-port/convert_to_codex.py . .`，再删掉 .ccgs-new 文件。
+
+   如果项目原本就有 `CLAUDE.md`，再在里面加一行 `@PROJECT-NOTES.md`，让 Claude Code 也遵守同一套规矩。
 
    其他 `.ccgs-new` 文件也照这个思路处理。
 4. 在项目根目录启动 Codex，信任项目，再输入 `/hooks` 信任钩子。
@@ -164,7 +167,7 @@ Codex 的技能没法自己切换模型，所以各档的处理方式不同：
 
 如果结果明显不能用（测试还是没过、不满足验收标准、和设计文档矛盾），Codex 也会主动升级。heavy 档的 agent 本来就是 astra + high，所以直接跳到第 2 级。同一步在每一级最多只试一次。需要你回答的问题和创作类决定永远不会被升级，而是直接交给你。
 
-**试两次就问你**：已经失败两次的修复不会再升级重试。同一个问题总共最多试两次，之后 agent 会返回 `BLOCKED: two attempts failed`，由 Codex 来问你。这条规矩写在 `AGENTS.md` 的「Project notes」区块里（见第 7 节），同一区块还有另外两条：开始修复前先用一句话说清交付什么；实现类任务长时间没有修改就停下来问你。
+**试两次就问你**：已经失败两次的修复不会再升级重试。同一个问题总共最多试两次，之后 agent 会返回 `BLOCKED: two attempts failed`，由 Codex 来问你。这条规矩写在 `PROJECT-NOTES.md` 里（见第 7 节），同一区块还有另外两条：开始修复前先用一句话说清交付什么；实现类任务长时间没有修改就停下来问你。
 
 想调整的话，改 `model_tiers.toml`，然后重新生成（见第 9 节）：
 - **改某一档的模型或推理强度**：修改 `[tiers.*]`。
@@ -191,7 +194,7 @@ Codex 的技能没法自己切换模型，所以各档的处理方式不同：
 - `player_facing_text`
 - `music_and_audio`
 
-原版只在 autonomous 模式下才会查看这个清单，所以 `AGENTS.md` 的「Project notes」区块另外规定：这四类决定在任何模式下都必须问你。它们涵盖：
+原版只在 autonomous 模式下才会查看这个清单，所以 `PROJECT-NOTES.md` 里另外规定：这四类决定在任何模式下都必须问你。它们涵盖：
 - **美术**：美术风格、角色和场景的外观、配色、UI 外观、特效。
 - **故事**：剧情、角色、世界观和背景设定、任务、结局、基调。
 - **玩家可见的文本**：对话、道具和技能说明、界面文字、教程、商店页。
@@ -207,24 +210,26 @@ Codex 的技能没法自己切换模型，所以各档的处理方式不同：
 |---|---|
 | `codex-port/model_tiers.toml` | 每一档对应的模型和推理强度、升级顺序、单个 agent 或技能的档位覆盖 |
 | `codex-port/skills.toml` | `implicit_invocation = "all"` 表示所有技能都能自动触发；改成 `"upstream"` 恢复原版行为，即 `$dev-story`、`$story-done`、`$hotfix`、`$day-one-patch` 只在你手动输入时才运行 |
-| `codex-port/preset/project-notes.md` | 新生成的 `AGENTS.md` 里「Project notes」的默认内容（也就是创作决定那条规则） |
+| `codex-port/preset/project-notes.md` | 全新构建模板时 `PROJECT-NOTES.md` 的初始内容（创作决定和重试两条规矩） |
 | `codex-port/preset/project-modes.yaml` | 全新构建模板时，写进 `project.yaml` 的默认 `modes:` 区块 |
 | `project.yaml` | 引擎、自动化模式、必问类别、评审强度等工作室设置。可以用 `$settings` 修改，也可以直接编辑。 |
 | `project.local.yaml` | 你个人对 `project.yaml` 的覆盖设置，不会被 git 提交 |
-| `AGENTS.md` 的「Project notes」 | 你给 Codex 定的项目规矩 |
+| `PROJECT-NOTES.md` | 你给这个项目定的规矩，Codex 和 Claude Code 都会遵守 |
 
 **自己的规矩应该写在哪：**
 
 | 规矩类型 | 写在哪里 |
 |---|---|
 | 所有项目都适用的个人习惯（比如「用中文回复」） | `~/.codex/AGENTS.md` |
-| 这个项目的简短规矩 | `AGENTS.md` 的「Project notes」区块 |
-| 很长、很细的规矩 | 单独写一个文件，再在 Project notes 里加一行说明什么时候去读它 |
+| 这个项目的简短规矩 | `PROJECT-NOTES.md` |
+| 很长、很细的规矩 | 单独写一个文件，再在 `PROJECT-NOTES.md` 里加一行说明什么时候去读它 |
 | 只针对某类文件的规矩 | `.claude/rules/` 里的规则文件，开头用 `paths:` 指定适用的文件 |
 | 项目设置 | `project.yaml`，或者用 `$settings` 修改 |
 | 绝对不能发生的事 | `.codex/rules/` 或钩子。`AGENTS.md` 只是给 AI 的指引，规则和钩子才是强制执行的 |
 
-Codex 默认最多读取 32 KiB 的 `AGENTS.md`，生成出来的文件大约 23 KiB，所以 Project notes 请尽量写得简短。Project notes 放在文件靠前的位置，就算文件超出上限，它也不会被截掉。
+Codex 默认最多读取 32 KiB 的 `AGENTS.md`，加上你的规矩后生成出来大约 24 KiB，所以 `PROJECT-NOTES.md` 请尽量写得简短。这部分规矩放在 `AGENTS.md` 靠前的位置，就算文件超出上限，它也不会被截掉。
+
+**改完 `PROJECT-NOTES.md` 之后**：Claude Code 下次开会话就会读到新内容。Codex 读的是副本，需要重新生成（见第 9 节）；在重新生成之前，会话开始时的钩子会发现文件有变化，并提醒 Codex 直接去读 `PROJECT-NOTES.md`。
 
 ## 9. 重新生成 Codex 配置层
 
@@ -235,7 +240,7 @@ python -I codex-port/convert_to_codex.py . .
 ```
 
 它只重写下面这些生成出来的文件：
-- `AGENTS.md`（「Project notes」区块会保留）
+- `AGENTS.md`（其中的「Project notes」区块从 `PROJECT-NOTES.md` 复制过来，`PROJECT-NOTES.md` 本身永远不会被覆盖）
 - `.agents/skills/`
 - `.codex/agents/`
 - `.codex/hooks.json`
@@ -313,3 +318,4 @@ codex execpolicy check --rules .codex/rules/ccgs.rules git reset --hard
 | 4 个技能只能手动调用 | 所有技能都能自动触发（可以配置） |
 | 子目录里的 `CLAUDE.md` 自动加载 | 列在 `AGENTS.md` 的路径规则表里，Codex 修改这些目录下的文件前会先去读 |
 | 状态栏、桌面通知、agent 团队 | Codex 里没有对应功能 |
+| 项目规矩写在 `CLAUDE.md` 里 | 两边共用 `PROJECT-NOTES.md`：Codex 复制进 `AGENTS.md`，Claude Code 直接引用 |

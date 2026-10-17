@@ -19,7 +19,7 @@ This project uses [Codex Game Studios](https://github.com/venus2099/codex-game-s
 python -I codex-port/convert_to_codex.py . .
 ```
 
-Your own rules for Codex go in the "Project notes" block of `AGENTS.md`.
+Your own rules go in `PROJECT-NOTES.md`. Codex and Claude Code both follow it; after you edit it, run the command above so Codex's copy in `AGENTS.md` is refreshed.
 
 ---
 
@@ -44,4 +44,4 @@ Your own rules for Codex go in the "Project notes" block of `AGENTS.md`.
 python -I codex-port/convert_to_codex.py . .
 ```
 
-你自己给 Codex 定的规矩，写在 `AGENTS.md` 的「Project notes」区块里。
+你自己定的规矩写在 `PROJECT-NOTES.md` 里，Codex 和 Claude Code 都会遵守。改完后运行上面那条命令，刷新 `AGENTS.md` 里给 Codex 的副本。

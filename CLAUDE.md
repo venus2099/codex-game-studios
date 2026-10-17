@@ -81,3 +81,10 @@ elsewhere in the repo, so they are restated here rather than lost:
 - **Helpers in `.claude/scripts/` emit observations, never verdicts.** A script
   that scores or judges will eventually contradict a mode or override it cannot
   see. (Cited by `artifact-check.sh` and `adr-dep-graph.sh`.)
+
+## Project Notes
+
+Project-specific rules, shared with Codex. Where they conflict with the
+defaults above, they win.
+
+@PROJECT-NOTES.md

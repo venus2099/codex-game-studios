@@ -24,6 +24,7 @@ This is a Codex port of [Claude Code Game Studios](https://github.com/Donchitos/
 - **Automatic escalation.** An agent that gets stuck reports `BLOCKED:` instead of guessing. Codex then retries the step on a stronger model, then on the strongest model at maximum reasoning, and asks you only if that also fails.
 - **Creative decisions stay yours.** The template runs in *guided* mode, so Codex handles small decisions on its own. Decisions about art, story, player-facing text and music always come back to you.
 - **Safe install scripts.** One script creates a new game. Another adds the studio to an existing game without overwriting any of its files.
+- **One rules file for both tools.** Your project's own rules live in `PROJECT-NOTES.md`. Codex gets a copy in `AGENTS.md`, and Claude Code imports it from `CLAUDE.md`, so both follow the same rules.
 - **Regenerator.** `codex-port/convert_to_codex.py` rebuilds the Codex layer after you change a setting or update from upstream.
 
 ## Requirements
@@ -60,7 +61,7 @@ bash ~/code/codex-game-studios/codex-port/add-to-project.sh ~/code/existing-game
 
 The script never overwrites a file. If a file already exists with different content, it leaves yours alone and writes the template's version next to it as `<file>.ccgs-new`.
 
-If your project already had an `AGENTS.md`, merge it before you start: move your own rules into the "Project notes" block of `AGENTS.md.ccgs-new`, then replace `AGENTS.md` with it. Until you do, the studio rules are inactive.
+If your project already had an `AGENTS.md`, merge it before you start: move your own rules into `PROJECT-NOTES.md`, then replace `AGENTS.md` with `AGENTS.md.ccgs-new` and regenerate (`python -I codex-port/convert_to_codex.py . .`). Until you do, the studio rules are inactive. If it already had a `CLAUDE.md`, add the line `@PROJECT-NOTES.md` to it so Claude Code follows the same rules.
 
 Then start Codex in the project, trust it and its hooks, and type `$adopt` to get a migration plan.
 
