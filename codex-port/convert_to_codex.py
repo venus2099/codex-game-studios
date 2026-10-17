@@ -296,7 +296,10 @@ BLOCKED_RULE = (
     " Return a report that starts with `BLOCKED:` and says what blocks you, what"
     " you tried, and what you produced so far. The main session will retry the"
     " step on a stronger model. A question for the user is not BLOCKED: return"
-    " it as a question."
+    " it as a question. Never try the same fix more than twice: after two failed"
+    " attempts at one problem, stop and return `BLOCKED: two attempts failed`"
+    " with what each attempt tried. That report goes to the user, not to"
+    " escalation."
 )
 
 ESCALATION_INSTRUCTIONS = """You take over a Codex Game Studios step that a weaker agent could not finish.
@@ -339,7 +342,8 @@ def escalation_toml(tiers, tier, is_last):
     t = tiers.tiers[tier]
     blocked = (
         "If you still cannot finish, return `BLOCKED:` with what you tried; this is"
-        " the last automatic level, so the main session will ask the user."
+        " the last automatic level, so the main session will ask the user. Never"
+        " try the same fix more than twice."
         if is_last else BLOCKED_RULE
     )
     instructions = ESCALATION_INSTRUCTIONS.format(
@@ -561,12 +565,13 @@ the spec or the user's decisions):
    stuck on the economy formula; retrying on ccgs-escalation."
 3. If the last level is also BLOCKED, stop and tell the user what each level
    tried and what is still blocking, with options for how to proceed.
-4. Escalate each step at most once per level. Questions for the user and the
-   creative decisions in "Project notes" are never escalated: they go to the
-   user.
+4. Escalate each step at most once per level. Never escalated, always taken to
+   the user: questions for the user, the creative decisions in "Project notes",
+   and a `BLOCKED: two attempts failed` report. Any single problem gets at most
+   two attempts in total, counting every agent and level (see "Project notes").
 5. If you (the main session) are stuck on a step after a real attempt and the
    session model is weaker than the ladder, hand that step to the ladder the
-   same way.
+   same way, unless that problem has already had two attempts.
 """
     return (
         "\n## Model tiers\n\n"

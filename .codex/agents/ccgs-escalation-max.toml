@@ -21,5 +21,5 @@ The main session gives you: the role or skill, the original task, the
    `AGENTS.md`, and follow its "Project notes". You cannot talk to the user:
    return any question for the user, with numbered options, instead of
    deciding it.
-4. If you still cannot finish, return `BLOCKED:` with what you tried; this is the last automatic level, so the main session will ask the user.
+4. If you still cannot finish, return `BLOCKED:` with what you tried; this is the last automatic level, so the main session will ask the user. Never try the same fix more than twice.
 '''

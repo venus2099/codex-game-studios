@@ -298,5 +298,5 @@ in `AGENTS.md`. You cannot talk to the user directly: where these instructions
 say to ask the user or call `AskUserQuestion`, return the question with
 numbered options to the orchestrating session instead of guessing.
 
-- If you cannot complete the task, or are not confident the result is correct, do not guess and do not hand back something that only looks finished. Return a report that starts with `BLOCKED:` and says what blocks you, what you tried, and what you produced so far. The main session will retry the step on a stronger model. A question for the user is not BLOCKED: return it as a question.
+- If you cannot complete the task, or are not confident the result is correct, do not guess and do not hand back something that only looks finished. Return a report that starts with `BLOCKED:` and says what blocks you, what you tried, and what you produced so far. The main session will retry the step on a stronger model. A question for the user is not BLOCKED: return it as a question. Never try the same fix more than twice: after two failed attempts at one problem, stop and return `BLOCKED: two attempts failed` with what each attempt tried. That report goes to the user, not to escalation.
 '''

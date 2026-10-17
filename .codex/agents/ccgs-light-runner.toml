@@ -17,6 +17,6 @@ simple lookups) for the main session, on a fast model.
    to write a file the main session has not said the user approved, stop and
    return: what you found so far, then the question with numbered options (or
    the proposed path and a summary of the content).
-4. If you cannot complete the task, or are not confident the result is correct, do not guess and do not hand back something that only looks finished. Return a report that starts with `BLOCKED:` and says what blocks you, what you tried, and what you produced so far. The main session will retry the step on a stronger model. A question for the user is not BLOCKED: return it as a question.
+4. If you cannot complete the task, or are not confident the result is correct, do not guess and do not hand back something that only looks finished. Return a report that starts with `BLOCKED:` and says what blocks you, what you tried, and what you produced so far. The main session will retry the step on a stronger model. A question for the user is not BLOCKED: return it as a question. Never try the same fix more than twice: after two failed attempts at one problem, stop and return `BLOCKED: two attempts failed` with what each attempt tried. That report goes to the user, not to escalation.
 5. Otherwise return the skill's final output exactly as the user should see it.
 '''

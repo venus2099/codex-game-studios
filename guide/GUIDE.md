@@ -164,6 +164,8 @@ A Codex skill cannot switch the model, so the port handles each tier differently
 
 Codex also escalates when a result is clearly unusable: tests still fail, it fails its acceptance criteria, or it contradicts the design. Heavy agents already run on astra at high, so they skip straight to level 2. Each step is escalated at most once per level. Questions for you and creative decisions are never escalated; they go straight to you.
 
+**Two attempts, then ask.** Escalation never retries a fix that has already failed twice. Any single problem gets at most two attempts in total; after that the agent returns `BLOCKED: two attempts failed` and Codex asks you. This rule lives in the "Project notes" block of `AGENTS.md` (section 7), together with two others: name the deliverable in one sentence before starting a fix, and stop to check with you after a long stretch of implementation work with no edits.
+
 To change any of this, edit `model_tiers.toml`, then regenerate (section 9):
 - **Change a tier's model or reasoning:** edit `[tiers.*]`.
 - **Change the escalation order:** edit `[escalation] ladder`.

@@ -21,5 +21,5 @@ The main session gives you: the role or skill, the original task, the
    `AGENTS.md`, and follow its "Project notes". You cannot talk to the user:
    return any question for the user, with numbered options, instead of
    deciding it.
-4. If you cannot complete the task, or are not confident the result is correct, do not guess and do not hand back something that only looks finished. Return a report that starts with `BLOCKED:` and says what blocks you, what you tried, and what you produced so far. The main session will retry the step on a stronger model. A question for the user is not BLOCKED: return it as a question.
+4. If you cannot complete the task, or are not confident the result is correct, do not guess and do not hand back something that only looks finished. Return a report that starts with `BLOCKED:` and says what blocks you, what you tried, and what you produced so far. The main session will retry the step on a stronger model. A question for the user is not BLOCKED: return it as a question. Never try the same fix more than twice: after two failed attempts at one problem, stop and return `BLOCKED: two attempts failed` with what each attempt tried. That report goes to the user, not to escalation.
 '''
