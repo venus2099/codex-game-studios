@@ -28,8 +28,12 @@ framework:
 
 modes:
   automation: guided
+  # Chosen on purpose: director reviews run at phase gates only. Pinning it here
+  # means the rigor answer in $start / /start no longer changes it; change it
+  # with $settings modes.review_mode=<full|lean|solo>.
+  review_mode: lean
   # Asked even in autonomous mode. The last four are this project's creative
-  # categories; AGENTS.md "Project notes" makes them ask in guided mode too.
+  # categories; PROJECT-NOTES.md makes them ask in guided mode too.
   automation_always_ask:
     - scope_changes
     - file_deletions

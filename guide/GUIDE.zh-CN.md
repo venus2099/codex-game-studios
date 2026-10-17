@@ -146,7 +146,8 @@ codex
 
 | 档位 | 原版 | 默认模型（推理强度） | 用在哪 |
 |---|---|---|---|
-| heavy | opus，以及通过 `[overrides]` 加入的架构类技能 | `gpt-6-astra`（high） | `creative-director`、`producer`、`technical-director` 三位总监；`$gate-check`、`$architecture-review`、`$review-all-gdds`、`$create-architecture`、`$architecture-decision`、`$map-systems` 六个技能 |
+| top | 在 `[overrides]` 里指定 | `gpt-6-astra`（xhigh） | `technical-director` 技术总监（在 Claude Code 里，`PROJECT-NOTES.md` 规定它用 Fable） |
+| heavy | opus，以及通过 `[overrides]` 加入的架构类技能 | `gpt-6-astra`（high） | `creative-director`、`producer` 两位总监；`$gate-check`、`$architecture-review`、`$review-all-gdds`、`$create-architecture`、`$architecture-decision`、`$map-systems` 六个技能 |
 | standard | sonnet，以及原版跟随会话模型的 agent | `gpt-6.1-sol`（high） | 其余 46 个 agent |
 | light | haiku | `gpt-6-luna`（high） | `$help`、`$onboard`、`$project-stage-detect`、`$scope-check`、`$sprint-status` |
 
@@ -167,7 +168,7 @@ Codex 的技能没法自己切换模型，所以各档的处理方式不同：
 2. `ccgs-escalation-max`（`gpt-6-astra`，xhigh）
 3. 停下来问你，并说明每一级都试过什么。
 
-如果结果明显不能用（测试还是没过、不满足验收标准、和设计文档矛盾），Codex 也会主动升级。heavy 档的 agent 本来就是 astra + high，所以直接跳到第 2 级。同一步在每一级最多只试一次。需要你回答的问题和创作类决定永远不会被升级，而是直接交给你。
+如果结果明显不能用（测试还是没过、不满足验收标准、和设计文档矛盾），Codex 也会主动升级。不比 agent 自身模型更强的那一级会被跳过：heavy 档的 agent（astra + high）直接跳到第 2 级，技术总监（astra + xhigh）直接来问你。同一步在每一级最多只试一次。需要你回答的问题和创作类决定永远不会被升级，而是直接交给你。
 
 **试两次就问你**：已经失败两次的修复不会再升级重试。同一个问题总共最多试两次，之后 agent 会返回 `BLOCKED: two attempts failed`，由 Codex 来问你。这条规矩写在 `PROJECT-NOTES.md` 里（见第 7 节），同一区块还有另外两条：开始修复前先用一句话说清交付什么；实现类任务长时间没有修改就停下来问你。
 
@@ -189,6 +190,8 @@ Codex 的技能没法自己切换模型，所以各档的处理方式不同：
 | `autonomous` | 除了 `modes.automation_always_ask` 里列出的类别，其他都由 Codex 自己决定，并把每个决定记录到 `production/session-logs/decision-log.md`。 |
 
 要切换模式，说一句「把 automation 改成 collaborative」就行（Codex 会调用 `$settings`），也可以直接编辑 `project.yaml`。`$start` 新手引导时会问你选哪种模式，想保持 guided 的话记得再选一次。
+
+**总监只在阶段评审时出场。** 模板把 `modes.review_mode` 设为 `lean`：创意总监、制作人、技术总监只在 `$gate-check` 阶段评审时参与，平时每一步的总监评审会跳过。因为这个值直接写在了 `project.yaml` 里，`$start` 里选的严谨程度不会再改变它；想调整就用 `$settings modes.review_mode=full`（每一步都评审）或 `solo`（不请总监）。
 
 **创作类决定始终由你来定。** 模板在 `modes.automation_always_ask` 里加了四个类别：
 - `art_and_visuals`

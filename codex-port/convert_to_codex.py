@@ -131,10 +131,23 @@ class Tiers:
             if tier not in self.tiers:
                 sys.exit(f"model_tiers.toml: escalation ladder names unknown tier '{tier}'")
 
+    EFFORT_RANK = {"minimal": 0, "low": 1, "medium": 2, "high": 3, "xhigh": 4, "max": 5}
+
     def escalation_for(self, tier):
-        """Escalation agents to try, in order, after an agent on `tier` is BLOCKED."""
+        """Escalation agents to try, in order, after an agent on `tier` is BLOCKED.
+
+        A ladder step is skipped when it is not stronger than `tier`: the same
+        model at the same or a lower reasoning effort.
+        """
         current = self.tiers.get(tier) if tier else None
-        return [f"ccgs-{t}" for t in self.ladder if self.tiers[t] != current]
+
+        def stronger(step):
+            if current is None or step["model"] != current["model"]:
+                return True
+            rank = self.EFFORT_RANK.get
+            return rank(step["reasoning_effort"], 0) > rank(current["reasoning_effort"], 0)
+
+        return [f"ccgs-{t}" for t in self.ladder if stronger(self.tiers[t])]
 
     def tier_for(self, name, upstream_model):
         """Tier name, or None when the item should run on the session model."""

@@ -15,6 +15,12 @@
 model = "gpt-6-astra"
 reasoning_effort = "high"
 
+# The strongest setting, for the few roles whose mistakes are costliest
+# (see [overrides]: technical-director).
+[tiers.top]
+model = "gpt-6-astra"
+reasoning_effort = "xhigh"
+
 # Upstream `sonnet`: implementation, design authoring, single-system analysis.
 [tiers.standard]
 model = "gpt-6.1-sol"
@@ -56,3 +62,6 @@ inherit = "standard"
 "create-architecture" = "heavy"
 "architecture-decision" = "heavy"
 "map-systems" = "heavy"
+# Architecture feasibility and technical risk: the director whose mistakes
+# cost the most rework. (Claude Code: PROJECT-NOTES.md pins it to Fable.)
+"technical-director" = "top"

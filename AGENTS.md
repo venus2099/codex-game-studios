@@ -34,7 +34,7 @@ Also:
 
 ## Project notes
 
-<!-- project-notes-sha256: b9d573b98183a9859d1f5dd12d9c19b265c25fb56b27adbc7b5977776082cd52 -->
+<!-- project-notes-sha256: 985c10efcdaa58d1d02845bbb7a4f7f6a90597e4a590a98c6620cf9950569e1b -->
 <!-- BEGIN PROJECT NOTES: copied from PROJECT-NOTES.md; edit that file, not this block -->
 ### Creative decisions are always the user's
 
@@ -69,6 +69,11 @@ follows the normal guided rules.
 ### 模型提醒
 
 开始系统架构、技术决策、系统拆分、阶段评审这类工作前（`create-architecture`、`architecture-decision`、`map-systems`、`gate-check`、`review-all-gdds`、`architecture-review`），如果当前会话不是最强的模型（Claude 用 Fable，Codex 用 `gpt-6-astra`），先提醒我一次可以切换，再继续。
+
+### 总监用的模型
+
+- 技术总监（`technical-director`）固定用最强的模型：在 Claude Code 里派出它时，指定 `model: fable`；在 Codex 里它的配置已经固定为 `gpt-6-astra` + xhigh。
+- 创意总监（`creative-director`）和制作人（`producer`）保持 Opus（Codex 里是 `gpt-6-astra` + high），不要额外指定。
 <!-- END PROJECT NOTES -->
 
 
@@ -351,7 +356,8 @@ are delegated to `ccgs-light-runner`, heavy skills ask the user to consider
 
 | Tier | Model (effort) | Agents | Skills | If BLOCKED |
 |---|---|---|---|---|
-| **heavy** | `gpt-6-astra` (high) | `creative-director`, `producer`, `technical-director` | `$architecture-decision`, `$architecture-review`, `$create-architecture`, `$gate-check`, `$map-systems`, `$review-all-gdds` | `ccgs-escalation-max` → ask the user |
+| **heavy** | `gpt-6-astra` (high) | `creative-director`, `producer` | `$architecture-decision`, `$architecture-review`, `$create-architecture`, `$gate-check`, `$map-systems`, `$review-all-gdds` | `ccgs-escalation-max` → ask the user |
+| **top** | `gpt-6-astra` (xhigh) | `technical-director` | — | ask the user |
 | **standard** | `gpt-6.1-sol` (high) | all other agents (46) | all other skills (they run on the session model) | `ccgs-escalation` → `ccgs-escalation-max` → ask the user |
 | **light** | `gpt-6-luna` (high) | `ccgs-light-runner` | `$help`, `$onboard`, `$project-stage-detect`, `$scope-check`, `$sprint-status` | `ccgs-escalation` → `ccgs-escalation-max` → ask the user |
 | **escalation** | `gpt-6-astra` (high) | `ccgs-escalation` | — | `ccgs-escalation-max` → ask the user |

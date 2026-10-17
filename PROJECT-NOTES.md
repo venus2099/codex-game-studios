@@ -36,3 +36,8 @@ follows the normal guided rules.
 ### 模型提醒
 
 开始系统架构、技术决策、系统拆分、阶段评审这类工作前（`create-architecture`、`architecture-decision`、`map-systems`、`gate-check`、`review-all-gdds`、`architecture-review`），如果当前会话不是最强的模型（Claude 用 Fable，Codex 用 `gpt-6-astra`），先提醒我一次可以切换，再继续。
+
+### 总监用的模型
+
+- 技术总监（`technical-director`）固定用最强的模型：在 Claude Code 里派出它时，指定 `model: fable`；在 Codex 里它的配置已经固定为 `gpt-6-astra` + xhigh。
+- 创意总监（`creative-director`）和制作人（`producer`）保持 Opus（Codex 里是 `gpt-6-astra` + high），不要额外指定。

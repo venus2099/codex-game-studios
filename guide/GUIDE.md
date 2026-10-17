@@ -146,7 +146,8 @@ Every skill and agent in the original studio is rated by difficulty. The port ma
 
 | Tier | Original | Default model (reasoning) | Used by |
 |---|---|---|---|
-| heavy | opus, plus architecture skills via `[overrides]` | `gpt-6-astra` (high) | `creative-director`, `producer`, `technical-director`; skills `$gate-check`, `$architecture-review`, `$review-all-gdds`, `$create-architecture`, `$architecture-decision`, `$map-systems` |
+| top | set in `[overrides]` | `gpt-6-astra` (xhigh) | `technical-director` (in Claude Code, `PROJECT-NOTES.md` pins it to Fable) |
+| heavy | opus, plus architecture skills via `[overrides]` | `gpt-6-astra` (high) | `creative-director`, `producer`; skills `$gate-check`, `$architecture-review`, `$review-all-gdds`, `$create-architecture`, `$architecture-decision`, `$map-systems` |
 | standard | sonnet, plus agents that followed the session model | `gpt-6.1-sol` (high) | the other 46 agents |
 | light | haiku | `gpt-6-luna` (high) | `$help`, `$onboard`, `$project-stage-detect`, `$scope-check`, `$sprint-status` |
 
@@ -167,7 +168,7 @@ A Codex skill cannot switch the model, so the port handles each tier differently
 2. `ccgs-escalation-max` (`gpt-6-astra`, xhigh)
 3. Codex stops and asks you, explaining what each level tried.
 
-Codex also escalates when a result is clearly unusable: tests still fail, it fails its acceptance criteria, or it contradicts the design. Heavy agents already run on astra at high, so they skip straight to level 2. Each step is escalated at most once per level. Questions for you and creative decisions are never escalated; they go straight to you.
+Codex also escalates when a result is clearly unusable: tests still fail, it fails its acceptance criteria, or it contradicts the design. A level that is not stronger than the agent's own model is skipped: heavy agents (astra at high) go straight to level 2, and `technical-director` (astra at xhigh) goes straight to you. Each step is escalated at most once per level. Questions for you and creative decisions are never escalated; they go straight to you.
 
 **Two attempts, then ask.** Escalation never retries a fix that has already failed twice. Any single problem gets at most two attempts in total; after that the agent returns `BLOCKED: two attempts failed` and Codex asks you. This rule lives in `PROJECT-NOTES.md` (section 7), together with two others: name the deliverable in one sentence before starting a fix, and stop to check with you after a long stretch of implementation work with no edits.
 
@@ -189,6 +190,8 @@ Model names must be ones your Codex account offers; `/model` lists them.
 | `autonomous` | Codex decides everything except the categories in `modes.automation_always_ask`, and logs every decision to `production/session-logs/decision-log.md`. |
 
 Change the mode by saying "set automation to collaborative" (Codex uses `$settings`), or edit `project.yaml`. `$start` asks for a mode during onboarding, so pick `guided` again there if that's what you want.
+
+**Director reviews run at phase gates only.** The template sets `modes.review_mode: lean`: the creative director, producer and technical director review at `$gate-check` phase gates, and per-step director reviews are skipped. Because the value is set in `project.yaml`, the rigor answer in `$start` no longer changes it; use `$settings modes.review_mode=full` (every step) or `solo` (no director reviews) to change it.
 
 **Creative decisions are always yours.** The template adds four categories to `modes.automation_always_ask`:
 - `art_and_visuals`
