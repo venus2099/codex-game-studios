@@ -146,7 +146,7 @@ codex
 
 | 档位 | 原版 | 默认模型（推理强度） | 用在哪 |
 |---|---|---|---|
-| heavy | opus | `gpt-6-astra`（high） | `creative-director`、`producer`、`technical-director` 三位总监；`$gate-check`、`$architecture-review`、`$review-all-gdds` 三个技能 |
+| heavy | opus，以及通过 `[overrides]` 加入的架构类技能 | `gpt-6-astra`（high） | `creative-director`、`producer`、`technical-director` 三位总监；`$gate-check`、`$architecture-review`、`$review-all-gdds`、`$create-architecture`、`$architecture-decision`、`$map-systems` 六个技能 |
 | standard | sonnet，以及原版跟随会话模型的 agent | `gpt-6.1-sol`（high） | 其余 46 个 agent |
 | light | haiku | `gpt-6-luna`（high） | `$help`、`$onboard`、`$project-stage-detect`、`$scope-check`、`$sprint-status` |
 
@@ -156,6 +156,8 @@ Codex 的技能没法自己切换模型，所以各档的处理方式不同：
 - **light 技能**：交给 `ccgs-light-runner` 执行。这是一个跑在快速模型上的 agent，做完把结果交回来；中途需要你做决定时，问题会转给你。
 - **heavy 技能**：会先看当前会话用的是什么模型。如果不是 heavy 档的模型，Codex 会提醒你一次可以用 `/model` 切换，然后继续。
 - **其余技能**：在你的会话里运行，用的是你当前会话的模型。
+
+**架构类工作**：系统架构、技术决策、系统拆分会影响后面所有系统，改起来代价也大，所以归入 heavy 档。`PROJECT-NOTES.md` 里还有一条提醒：开始这类工作和阶段评审之前，如果当前不是最强的模型（Claude 用 Fable，Codex 用 `gpt-6-astra`），两个工具都会先提醒你一次可以切换。
 
 **省钱建议**：大部分工作都在主会话里完成，所以开销主要取决于你的默认模型。想省钱的话，日常用 `gpt-6.1-sol`，碰到 heavy 技能提醒时，再用 `/model` 切到 `gpt-6-astra`。
 

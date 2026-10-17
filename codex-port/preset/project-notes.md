@@ -27,3 +27,7 @@ follows the normal guided rules.
   （b）同一种方法失败了两次。
 - 任何一个问题最多只试两次，不要再继续重试。这条优先于「卡住自动升级」：同一个问题失败两次后直接来问我，不要换更强的模型重试。升级机制只用于其他卡住的情况。
 - 子 agent 同样遵守：同一个问题失败两次就返回 `BLOCKED: two attempts failed`，并说明两次各试了什么，由主会话来问我。
+
+### 模型提醒
+
+开始系统架构、技术决策、系统拆分、阶段评审这类工作前（`create-architecture`、`architecture-decision`、`map-systems`、`gate-check`、`review-all-gdds`、`architecture-review`），如果当前会话不是最强的模型（Claude 用 Fable，Codex 用 `gpt-6-astra`），先提醒我一次可以切换，再继续。

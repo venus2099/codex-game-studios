@@ -20,7 +20,7 @@ This is a Codex port of [Claude Code Game Studios](https://github.com/Donchitos/
 ## What this port adds
 
 - **Native Codex layout.** `AGENTS.md`, skills in `.agents/skills/`, custom agents in `.codex/agents/`, hooks in `.codex/hooks.json` and command rules in `.codex/rules/`.
-- **Models by task difficulty.** Directors and phase-gate reviews run on the strongest model, everyday agents on a workhorse model, and status checks on a fast model. You can change the mapping in one file.
+- **Models by task difficulty.** Directors, architecture work and phase-gate reviews run on the strongest model, everyday agents on a workhorse model, and status checks on a fast model. You can change the mapping in one file.
 - **Automatic escalation.** An agent that gets stuck reports `BLOCKED:` instead of guessing. Codex then retries the step on a stronger model, then on the strongest model at maximum reasoning, and asks you only if that also fails.
 - **Creative decisions stay yours.** The template runs in *guided* mode, so Codex handles small decisions on its own. Decisions about art, story, player-facing text and music always come back to you.
 - **Safe install scripts.** One script creates a new game. Another adds the studio to an existing game without overwriting any of its files.

@@ -51,3 +51,8 @@ inherit = "standard"
 # Per-agent or per-skill overrides, by name: tier name or "session".
 [overrides]
 # "game-designer" = "heavy"
+# Architecture and system decomposition affect every later system and are
+# costly to undo, so their skills recommend the heavy model like phase gates.
+"create-architecture" = "heavy"
+"architecture-decision" = "heavy"
+"map-systems" = "heavy"

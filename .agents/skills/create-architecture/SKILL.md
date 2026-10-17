@@ -12,6 +12,11 @@ Arguments: `[focus-area: full | layers | data-flow | api-boundaries | adr-audit]
 This is the Codex entry point for the upstream skill
 `.claude/skills/create-architecture/SKILL.md`, which stays the single source of truth.
 
+**Model tier: heavy** (gpt-6-astra, reasoning effort high).
+If this session runs a different model, tell the user once, before step 1,
+that this skill is rated heavy and that `/model` can switch to gpt-6-astra;
+then continue on the current model unless they choose to switch.
+
 1. Read `.claude/skills/create-architecture/SKILL.md` in full before doing anything else.
 2. If it has lines starting with `` !` ``, they are startup commands. Run each
    one from the repository root with `${CLAUDE_SKILL_DIR}` = `.claude/skills/create-architecture`

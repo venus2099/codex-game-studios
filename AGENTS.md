@@ -34,7 +34,7 @@ Also:
 
 ## Project notes
 
-<!-- project-notes-sha256: 8580990f29eb4f0ee4971055798d801c51040c526afaaf847ffdd5170167d2d9 -->
+<!-- project-notes-sha256: b9d573b98183a9859d1f5dd12d9c19b265c25fb56b27adbc7b5977776082cd52 -->
 <!-- BEGIN PROJECT NOTES: copied from PROJECT-NOTES.md; edit that file, not this block -->
 ### Creative decisions are always the user's
 
@@ -65,6 +65,10 @@ follows the normal guided rules.
   （b）同一种方法失败了两次。
 - 任何一个问题最多只试两次，不要再继续重试。这条优先于「卡住自动升级」：同一个问题失败两次后直接来问我，不要换更强的模型重试。升级机制只用于其他卡住的情况。
 - 子 agent 同样遵守：同一个问题失败两次就返回 `BLOCKED: two attempts failed`，并说明两次各试了什么，由主会话来问我。
+
+### 模型提醒
+
+开始系统架构、技术决策、系统拆分、阶段评审这类工作前（`create-architecture`、`architecture-decision`、`map-systems`、`gate-check`、`review-all-gdds`、`architecture-review`），如果当前会话不是最强的模型（Claude 用 Fable，Codex 用 `gpt-6-astra`），先提醒我一次可以切换，再继续。
 <!-- END PROJECT NOTES -->
 
 
@@ -347,7 +351,7 @@ are delegated to `ccgs-light-runner`, heavy skills ask the user to consider
 
 | Tier | Model (effort) | Agents | Skills | If BLOCKED |
 |---|---|---|---|---|
-| **heavy** | `gpt-6-astra` (high) | `creative-director`, `producer`, `technical-director` | `$architecture-review`, `$gate-check`, `$review-all-gdds` | `ccgs-escalation-max` → ask the user |
+| **heavy** | `gpt-6-astra` (high) | `creative-director`, `producer`, `technical-director` | `$architecture-decision`, `$architecture-review`, `$create-architecture`, `$gate-check`, `$map-systems`, `$review-all-gdds` | `ccgs-escalation-max` → ask the user |
 | **standard** | `gpt-6.1-sol` (high) | all other agents (46) | all other skills (they run on the session model) | `ccgs-escalation` → `ccgs-escalation-max` → ask the user |
 | **light** | `gpt-6-luna` (high) | `ccgs-light-runner` | `$help`, `$onboard`, `$project-stage-detect`, `$scope-check`, `$sprint-status` | `ccgs-escalation` → `ccgs-escalation-max` → ask the user |
 | **escalation** | `gpt-6-astra` (high) | `ccgs-escalation` | — | `ccgs-escalation-max` → ask the user |

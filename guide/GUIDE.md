@@ -146,7 +146,7 @@ Every skill and agent in the original studio is rated by difficulty. The port ma
 
 | Tier | Original | Default model (reasoning) | Used by |
 |---|---|---|---|
-| heavy | opus | `gpt-6-astra` (high) | `creative-director`, `producer`, `technical-director`; skills `$gate-check`, `$architecture-review`, `$review-all-gdds` |
+| heavy | opus, plus architecture skills via `[overrides]` | `gpt-6-astra` (high) | `creative-director`, `producer`, `technical-director`; skills `$gate-check`, `$architecture-review`, `$review-all-gdds`, `$create-architecture`, `$architecture-decision`, `$map-systems` |
 | standard | sonnet, plus agents that followed the session model | `gpt-6.1-sol` (high) | the other 46 agents |
 | light | haiku | `gpt-6-luna` (high) | `$help`, `$onboard`, `$project-stage-detect`, `$scope-check`, `$sprint-status` |
 
@@ -156,6 +156,8 @@ A Codex skill cannot switch the model, so the port handles each tier differently
 - **Light skills** are handed to `ccgs-light-runner`, an agent on the fast model. It returns the result; if it needs a decision, the question comes back to you.
 - **Heavy skills** check the session model. If you aren't on the heavy model, Codex mentions once that you can switch with `/model`, then continues.
 - **All other skills** run in your session, on your session's model.
+
+**Architecture work.** System architecture, technical decisions and system decomposition shape every later system and are costly to undo, so they count as heavy. `PROJECT-NOTES.md` also asks both tools to remind you once to switch to the strongest model (Fable in Claude Code, `gpt-6-astra` in Codex) before that kind of work and before phase-gate reviews.
 
 **Cost tip.** Most of the work happens in the main session, so your default model drives most of the cost. To spend less, run day to day on `gpt-6.1-sol` and switch to `gpt-6-astra` with `/model` when a heavy skill asks.
 
